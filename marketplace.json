@@ -1,0 +1,22 @@
+{
+	"app_name": "Chattergram",
+	"description": "A chat application that translates your voice messages into written text",
+	"hidden": "false",
+	"rank": "99",
+	"type": "Full App",
+	"contributed_by": "Community",
+	"repo_url": "https://github.com/tq-bit/chattergram-redis",
+	"download_url": "",
+	"hosted_url": "",
+	"quick_deploy": "",
+	"deploy_buttons": [],
+	"language": ["Javascript"],
+	"redis_commands": [],
+	"redis_features": ["caching"],
+	"redis_modules": ["RediJSON"],
+	"app_image_urls": [],
+	"youtube_url": "",
+	"special_tags": ["Hackathon"],
+	"verticals": [],
+	"markdown": ""
+}
