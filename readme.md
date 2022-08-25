@@ -1,254 +1,111 @@
-<div id="top"></div>
+# Chattergram + Redis
+
+A chat application that transcribes voice messages to text
+
+[Insert app screenshots](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#uploading-assets)
 
 
+## How it works
 
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <a href="https://github.com/tq-bit/chattergram">
-    <img src="assets/logo.gif" alt="Logo" width="120px" height="120px">
-  </a>
+### How the data is stored:
 
-  <h3 align="center">Chattergram</h3>
+- This app uses two primary data types: `Users` and `Chat` entities created by [`redis-om`](https://redis.com/blog/introducing-redis-om-client-libraries/)
+- It also uses a secondary `Security` entity used to handle registering and login (MongoDB only).
 
-  <p align="center">
-    A chat application that transcribes voice messages to text
-  </p>
-  <div align="center">
-    <a href=""></a>
-    <img alt="GitHub" src="https://img.shields.io/github/license/tq-bit/chattergram?style=plastic&logo=apache"/>
-    <a href="https://chat.q-bit.me">
-      <img alt="Demo" src="https://img.shields.io/badge/Demo-Hosted%20on%20DO-blue?style=plastic&logo=digitalocean"/>
-    </a>
-    <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/tq-bit/chattergram?style=plastic&logo=git"/>
-    <a href="https://chat.q-bit.me/api/docs/static/index.html">
-      <img alt="Swagger Validator" src="https://img.shields.io/swagger/valid/3.0?specUrl=https%3A%2F%2Fchat.q-bit.me%2Fapi%2Fdocs%2Fjson&style=plastic&logo=swagger"/>
-    </a>
-  </div>
-</div>
+#### 1. The `Users` - entity
+
+- When a user registers, it's stored in MongoDB.
+- Mongoose uses one entity for `Users`, one for `Security`.
+- Fist, a `Security` entity is created. It includes the login data (User+PW-hash)
+- This entity is replicated into Redis' `Users` entity.
+- It includes three relevant properties
+  - A unique ID - (converted from MongoDB's ObjectId, `string`)
+  - The username - `(string)`
+  - The online status - `(bool)`
+- The replication happens from MongoDB into Redis when
+  - A new user is created (partial)
+  - The app is (re)-started (completely)
+- In Redis, the online status is updated and propagated via. [Redis Event Queue](https://redis.com/redis-best-practices/communication-patterns/event-queue/) & propagated to connected [Websockets](https://www.npmjs.com/package/ws) whenever
+  - An authenticated user connects their client's websocket to port 9090 (= Set to online=true)
+  - A user sends a message to another user
+  - The user's Websocket client disconnects
+
+#### 2. The `Chat` - entity
+
+- When a chat message is created, it's stored in Redis
+-
 
 
-<!-- ABOUT THE PROJECT -->
-## About The Project
+### How the data is accessed:
 
-Chattergram is a full-stack Typescript chat application. With a particular extra:
+Refer to [this example](https://github.com/redis-developer/basic-analytics-dashboard-redis-bitmaps-nodejs#how-the-data-is-accessed) for a more detailed example of what you need for this section.
 
-> It transcribes other people's (english) voice messages into written text for you
+### Performance Benchmarks
 
-[![Chattergram landingpage][product-screenshot]](#)
+[If you migrated an existing app to use Redis, please put performance benchmarks here to show the performance improvements.]
 
-I've created Chattergram for the [Dev.to & Deepgram Hackathon](https://dev.to/devteam/join-us-for-a-new-kind-of-hackathon-on-dev-brought-to-you-by-deepgram-2bjd). **It stands in no affiliation to the Android app ['Chattergram for Android'](https://apkpure.com/chattergram/com.wChattergram_5331914).**
+## How to run it locally?
 
-[![Chattergram audio recording][example-screenshot-I]](#)
-<div align="center">Recorded voice messages are automatically transcribed by <a href="https://developers.deepgram.com/api-reference/">Deepgram's Audio API.</a>.  </div>
-
-### Features
-- Above all: Voice message transcription from recorded audiofiles
-- User authentication
-- Persistent chats
-- Swift deployment with docker & docker-compose
-- Typed data structures & OpenAPI specification under `/api/docs`
-- Last but not least: Light & darkmode
-
-### Non-features
-- Accurate user login stati
-- User profiling
-- Chat rooms
-- Automated CI/CD
-- Automated testing
-
-### Demo
-
-You can try chattergram under https://chat.q-bit.me/.
-
-> The demo will remain up till the 31. of April or until my free Deepgram credit expires. It runs on a 2GB DO Droplet.
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-### Built With
-
-All application components of Chattergram are written in Typescript. In the following, you can see the foundation modules it uses:
-
-#### Frontend
-
-* [Vue 3 & its Composition API](https://vuejs.org/)
-* [Tailwind CSS](https://tailwindcss.com/)
-* [Nginx](https://www.nginx.com/) (production only)
-
-#### Backend
-* [Fastify + Plugins](https://www.fastify.io/)
-* [WS for realtime websockets](https://github.com/websockets/ws)
-* [Sequelize ORM](https://sequelize.org/) & [PostgreSQL](https://www.postgresql.org/)
-
-#### External Services
-* [Deepgram Speech-To-Text SAAS](https://deepgram.com/)
-
-#### Development & deployment
-* [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)
-* [Vite](https://vitejs.dev/) (development only)
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-<!-- GETTING STARTED -->
-## Getting Started
-
-Chattergram can be used in `production` and `development` mode. Before running any, you must follow the following, few steps:
+[Make sure you test this with a fresh clone of your repo, these instructions will be used to judge your app.]
 
 ### Prerequisites
 
-At a bare minimum, you need to have a working version of Docker and docker-compose installed on your machine. Please follow the official docs to set these up:
+[Fill out with any prerequisites (e.g. Node, Docker, etc.). Specify minimum versions]
 
-* [Install Docker](https://docs.docker.com/engine/install/)
-* [Install Docker Compose](https://docs.docker.com/compose/install/)
+### Local installation
 
-For development, you will also need a working version of node & npm.
+[Insert instructions for local installation]
 
-* [Install Nodejs & NPM](https://nodejs.org/en/download/)
-* Install with apt (Linux Ubuntu):
-  ```sh
-  $ sudo apt update
-  $ sudo apt install nodejs
-  $ node -v # output: vX.Y.Z
-  ```
+## Deployment
 
-### Installation
+To make deploys work, you need to create free account on [Redis Cloud](https://redis.info/try-free-dev-to)
 
-Chattergram uses the Deepgram API for STT. So register and grab an API key.
+### Google Cloud Run
 
-1. Create an account at [https://console.deepgram.com/signup](https://console.deepgram.com/signup)
-2. Create a new API key (persmission: Member is sufficient)
-3. Clone the repo
-   ```sh
-   git clone https://github.com/tq-bit/chattergram.git
-   ```
-4. Run `sh bin/setup` and pass in your API key OR
-5. Create a `.env` file in the root directory (you can use the .env.example file for templating) + enter your API key under `DEEPGRAM_KEY`
+[Insert Run on Google button](https://cloud.google.com/blog/products/serverless/introducing-cloud-run-button-click-to-deploy-your-git-repos-to-google-cloud)
 
-> Note: If you change global variables in this file, you have to adjust the respective docker-compose.(d|p).yaml file as well
+### Heroku
 
-### Run the app
+[Insert Deploy on Heroku button](https://devcenter.heroku.com/articles/heroku-button)
 
-There are two docker-compose files in the root directory. Each runs a few simple steps to build and run the application in an appropriate setup.
+### Netlify
 
-> Please note: I had problems running the app on a 1GB droplet on DO, Vite had problems with the allocated memory to Node, so there seems to be some minimum RAM requirement.
+[Insert Deploy on Netlify button](https://www.netlify.com/blog/2016/11/29/introducing-the-deploy-to-netlify-button/)
 
-**Run in dev mode**
+### Vercel
 
-After cloning the repos, run:
+[Insert Deploy on Vercel button](https://vercel.com/docs/deploy-button)
 
-```bash
-sudo bin/start.sh -d
-```
+## More Information about Redis Stack
 
-**Run in prod mode**
+Here some resources to help you quickly get started using Redis Stack. If you still have questions, feel free to ask them in the [Redis Discord](https://discord.gg/redis) or on [Twitter](https://twitter.com/redisinc).
 
-If you would like to run chattergram in your own environment, there are a few prerequisites. Or maybe not, if you're an experienced sysadmin.
+### Getting Started
 
-In any way, these were the points I set up for the demo:
+1. Sign up for a [free Redis Cloud account using this link](https://redis.info/try-free-dev-to) and use the [Redis Stack database in the cloud](https://developer.redis.com/create/rediscloud).
+1. Based on the language/framework you want to use, you will find the following client libraries:
+    - [Redis OM .NET (C#)](https://github.com/redis/redis-om-dotnet)
+        - Watch this [getting started video](https://www.youtube.com/watch?v=ZHPXKrJCYNA)
+        - Follow this [getting started guide](https://redis.io/docs/stack/get-started/tutorials/stack-dotnet/)
+    - [Redis OM Node (JS)](https://github.com/redis/redis-om-node)
+        - Watch this [getting started video](https://www.youtube.com/watch?v=KUfufrwpBkM)
+        - Follow this [getting started guide](https://redis.io/docs/stack/get-started/tutorials/stack-node/)
+    - [Redis OM Python](https://github.com/redis/redis-om-python)
+        - Watch this [getting started video](https://www.youtube.com/watch?v=PPT1FElAS84)
+        - Follow this [getting started guide](https://redis.io/docs/stack/get-started/tutorials/stack-python/)
+    - [Redis OM Spring (Java)](https://github.com/redis/redis-om-spring)
+        - Watch this [getting started video](https://www.youtube.com/watch?v=YhQX8pHy3hk)
+        - Follow this [getting started guide](https://redis.io/docs/stack/get-started/tutorials/stack-spring/)
 
-- You must have a valid domainname
-- In the frontend, you must adjust the constants `BASE_URL` for axios and `WS_BASE_URL` for the websocket connection to match your domain. (You can do a quick `CTRL+SHIFT+F` to search & replace `chat.q-bit.me`)
-- You must configure your server to use TLS for a `wss://` connection.
-- You must configure your server to connect to the backend app via websocket
+The above videos and guides should be enough to get you started in your desired language/framework. From there you can expand and develop your app. Use the resources below to help guide you further:
 
-<details>
-  <summary>If you're using nginx, a config as follows will do the trick. </summary>
-<pre>
-# In a dedicated file under /etc/nginx/sites-enabled/<your-domain>
-location /ws/ {
-  proxy_http_version 1.1;
-  proxy_set_header Upgrade $http_upgrade;
-  proxy_set_header Connection "Upgrade";
-  proxy_set_header Host $host;
-  proxy_read_timeout 86400s; # Prevents the WS connection from breaking after ~ 60secs
-  proxy_send_timeout 86400s;
-  proxy_pass http://localhost:9090/;
-}
-</pre>
-</details>
-
-Finally, you can start the app by using:
-
-```bash
-# Make the script executable
-sudo chmod +x bin/start.sh
-sudo bin/start.sh -p
-```
-
-You can restart the app to incorporate your latest changes by running `sudo bin/restart`.
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-<!-- USAGE EXAMPLES -->
-## Usage
-
- After starting the app, open a browser at `localhost:3000/` (dev) or your domain name (production) & create a new account.
-
-> All your information will be stored in a local PostgreSQL database
-
-[![Chattergram signup gif][onboarding-screenshot-I]](#)
-
-Select another user and start using STT. You can also use Chattergram for good-ol text chats.
-
-
-[![Chattergram transcription gif][onboarding-screenshot-II]](#)
-
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-<!-- LICENSE -->
-## License
-
-Apache License, Version 2.0 See `LICENSE` for more information.
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
-<!-- CONTACT -->
-## Contact
-
-Please tell me how you liked the submission. You can reach me on Twitter or on [dev.to](https://dev.to/tqbit) (or via. Chattergram ;-))
-
-> Please note that I will not actively develop this app. If you find a breaking bug, please open an issue and I'll look into it .
-
-Mail: [tobi@q-bit.me](mailto:tobi@q-bit.me) - Twitter: [@qbitme](https://twitter.com/qbitme)
-
-Project Link: [https://github.com/tq-bit/chattergram](https://github.com/tq-bit/chattergram)
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
-
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
-
-* [Tsvetomira Dichevska](https://www.linkedin.com/in/tsvetomira-dichevska/) thank you for creating my Logo and help me figure out this idea
-* [Othneildrew's Best-README-Template](https://github.com/othneildrew/Best-README-Template) which was used to write this template
-* [Heroicons](https://heroicons.com/) which are used throughout the application
-* [@sinclair/typebox](https://www.npmjs.com/package/@sinclair/typebox) for saving me the headache of typing twice
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/tq-bit/chattergram.svg??style=plastic&logo=appveyor
-[contributors-url]: https://github.com/tq-bit/chattergram/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/tq-bit/chattergram.svg??style=plastic&logo=appveyor
-[forks-url]: https://github.com/tq-bit/chattergram/network/members
-[stars-shield]: https://img.shields.io/github/stars/tq-bit/chattergram.svg??style=plastic&logo=appveyor
-[stars-url]: https://github.com/tq-bit/chattergram/stargazers
-[issues-shield]: https://img.shields.io/github/issues/tq-bit/chattergram.svg??style=plastic&logo=appveyor
-[issues-url]: https://github.com/tq-bit/chattergram/issues
-[license-shield]: https://img.shields.io/github/license/tq-bit/chattergram.svg??style=plastic&logo=appveyor
-[license-url]: https://github.com/tq-bit/chattergram/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg??style=social&logo=appveyor&logo=linkedin&colorB=555
-[linkedin-url]: https://www.linkedin.com/in/tobias-quante-764aa1140/
-[product-logo]: assets/logo.gif
-[product-screenshot]: assets/chattergram_landingpage.png
-[example-screenshot-I]: assets/chattergram_chat_I.png
-[example-screenshot-II]: assets/chattergram_chat_II.png
-[onboarding-screenshot-I]: assets/chattergram_signup.gif
-[onboarding-screenshot-II]: assets/chattergram_transcribe.gif
+1. [Developer Hub](https://redis.info/devhub) - The main developer page for Redis, where you can find information on building using Redis with sample projects, guides, and tutorials.
+1. [Redis Stack getting started page](https://redis.io/docs/stack/) - Lists all the Redis Stack features. From there you can find relevant docs and tutorials for all the capabilities of Redis Stack.
+1. [Redis Rediscover](https://redis.com/rediscover/) - Provides use-cases for Redis as well as real-world examples and educational material
+1. [RedisInsight - Desktop GUI tool](https://redis.info/redisinsight) - Use this to connect to Redis to visually see the data. It also has a CLI inside it that lets you send Redis CLI commands. It also has a profiler so you can see commands that are run on your Redis instance in real-time
+1. Youtube Videos
+    - [Official Redis Youtube channel](https://redis.info/youtube)
+    - [Redis Stack videos](https://www.youtube.com/watch?v=LaiQFZ5bXaM&list=PL83Wfqi-zYZFIQyTMUU6X7rPW2kVV-Ppb) - Help you get started modeling data, using Redis OM, and exploring Redis Stack
+    - [Redis Stack Real-Time Stock App](https://www.youtube.com/watch?v=mUNFvyrsl8Q) from Ahmad Bazzi
+    - [Build a Fullstack Next.js app](https://www.youtube.com/watch?v=DOIWQddRD5M) with Fireship.io
+    - [Microservices with Redis Course](https://www.youtube.com/watch?v=Cy9fAvsXGZA) by Scalable Scripts on freeCodeCamp
