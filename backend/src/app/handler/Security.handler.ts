@@ -6,6 +6,7 @@ import Handler from '../base/Handler';
 
 import UserModel from '../model/User.schema';
 import SecurityModel from '../model/Security.schema';
+import { UserRepository } from '../redis/redis.provider';
 
 import {
   UserSchemaType,
@@ -131,6 +132,10 @@ class SecurityHandler extends Handler {
     });
     await newAuthEntry.save();
     await newUserEntry.save();
+    await UserRepository.createAndSave({
+      ...newUserEntry.toObject(),
+      _id: newUserEntry.toObject()._id.toString(),
+    });
 
     const token = this.signJwt({ userId: newUserEntry._id.toString() });
     return reply.send({ user: newUserEntry, token });
