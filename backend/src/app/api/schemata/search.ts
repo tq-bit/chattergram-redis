@@ -1,4 +1,4 @@
-import { Static, Type } from '@sinclair/typebox';
+import { Type, Static } from '@sinclair/typebox';
 
 export const SearchResponseSchema = Type.Object({
   _id: Type.String(),

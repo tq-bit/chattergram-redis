@@ -20,7 +20,7 @@ import Logo from '../assets/logo.gif';
 const WS_BASE_URL =
   import.meta.env.MODE === 'development'
     ? 'ws://localhost:9090'
-    : 'wss://chat.q-bit.me/ws';
+    : 'ws://localhost:9090';
 
 const {
   users,

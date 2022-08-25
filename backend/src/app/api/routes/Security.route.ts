@@ -9,7 +9,7 @@ import {
 } from '../schemata';
 
 const securityRoutes: FastifyPluginCallback = (
-  fastify: FastifyInstance<any, any, any, any, any>,
+  fastify: FastifyInstance,
   opts: Record<never, never>,
   done: () => void,
 ) => {

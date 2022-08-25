@@ -25,6 +25,7 @@ export default class Transcriber {
       streamSource,
       {
         punctuate: true,
+        version: '1',
       },
     );
 

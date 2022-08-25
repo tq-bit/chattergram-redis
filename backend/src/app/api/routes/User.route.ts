@@ -12,7 +12,7 @@ import {
 } from '../schemata';
 
 const userRoutes: FastifyPluginCallback = (
-  fastify: FastifyInstance<any, any, any, any, any>,
+  fastify: FastifyInstance,
   opts: Record<never, never>,
   done: () => void,
 ) => {

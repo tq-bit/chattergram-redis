@@ -10,7 +10,7 @@ const { log } = useLogger('development');
 const BASE_URL =
   import.meta.env.MODE === 'development'
     ? 'http://localhost:8080/api/'
-    : 'https://chat.q-bit.me/api/';
+    : 'http://localhost:8080/api//';
 
 const client = axios.create({
   baseURL: BASE_URL,
