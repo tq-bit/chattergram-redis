@@ -245,4 +245,4 @@ Chattergram uses the Deepgram API for STT. So register and grab an API key.
 
 ## Deployment
 
-You can run and deploy Chattergram in any container environment. Please consult the [original readme](https://github.com/tq-bit/chattergram-redis/blob/master/readme_legacy.md#run-the-app) for this project for further information.
+You can run and deploy Chattergram in any container environment with a few tweaks. Please check out the [original readme](https://github.com/tq-bit/chattergram-redis/blob/master/readme_legacy.md#run-the-app) for this project for further information.
