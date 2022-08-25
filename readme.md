@@ -4,7 +4,6 @@ A chat application that transcribes voice messages to text
 
 [Insert app screenshots](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#uploading-assets)
 
-
 ## How it works
 
 ### How the data is stored:
@@ -78,9 +77,6 @@ I'm heavily relying on `redis-om` to access db data. Below, I'll give a few code
 
 #### 1. The `User` entity
 
-See [/src/app/redis/User.schema.ts](https://github.com/tq-bit/chattergram-redis/blob/master/backend/src/app/redis/User.schema.ts)
-
-
 ##### 1.1. Get the active user based on their userID
 
 File: [User.handler.ts](https://github.com/tq-bit/chattergram-redis/blob/master/backend/src/app/handler/User.handler.ts#L23)
@@ -108,8 +104,6 @@ public getUserList = async (req: AppRequest, reply: FastifyReply) => {
 ```
 
 #### 2: The `Chat` entity
-
-See [/src/app/redis/Chat.schema.ts](https://github.com/tq-bit/chattergram-redis/blob/master/backend/src/app/redis/Chat.schema.ts)
 
 ##### 2.1. Get a list of chat entries for a pair of `sender` & `receiver`
 
@@ -208,8 +202,6 @@ public async queryRedisStore(req: SearchRequest, reply: FastifyReply) {
 [If you migrated an existing app to use Redis, please put performance benchmarks here to show the performance improvements.]
 
 ## How to run it locally?
-
-[Make sure you test this with a fresh clone of your repo, these instructions will be used to judge your app.]
 
 ### Prerequisites
 

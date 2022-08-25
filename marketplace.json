@@ -1,6 +1,6 @@
 {
 	"app_name": "Chattergram",
-	"description": "A chat application that translates your voice messages into written text",
+	"description": "A chat application that transcribes voice messages to text",
 	"hidden": "false",
 	"rank": "99",
 	"type": "Full App",
