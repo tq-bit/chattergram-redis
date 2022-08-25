@@ -9,7 +9,7 @@ import UserModel from '../model/User.schema';
 import { ChatRepository, client, UserRepository } from './redis.provider';
 
 export async function syncRedisChatToMongo(
-  fastify: FastifyInstance,
+  fastify: FastifyInstance<any, any, any, any, any>,
   lastSync: string | null,
 ) {
   if (!lastSync) {
@@ -55,7 +55,9 @@ export async function syncRedisChatToMongo(
   }
 }
 
-export async function syncMongoChatHistoryToRedis(fastify: FastifyInstance) {
+export async function syncMongoChatHistoryToRedis(
+  fastify: FastifyInstance<any, any, any, any, any>,
+) {
   const threeMonthsAgo = DateTime.local().minus({ months: 3 });
   const historyFromLastThreeMonths = await ChatModel.find({
     dateSent: { $gte: threeMonthsAgo },
@@ -82,7 +84,9 @@ export async function syncMongoChatHistoryToRedis(fastify: FastifyInstance) {
   ChatRepository.createIndex();
 }
 
-export async function syncMongoUsersToRedis(fastify: FastifyInstance) {
+export async function syncMongoUsersToRedis(
+  fastify: FastifyInstance<any, any, any, any, any>,
+) {
   const userDocuments = await UserModel.find();
 
   fastify.log.info(
@@ -100,7 +104,9 @@ export async function syncMongoUsersToRedis(fastify: FastifyInstance) {
   UserRepository.createIndex();
 }
 
-export async function performFullSynchronization(fastify: FastifyInstance) {
+export async function performFullSynchronization(
+  fastify: FastifyInstance<any, any, any, any, any>,
+) {
   const lastSync = await client.get(KEY_REDIS_TO_MONGO_SYNC);
 
   await syncRedisChatToMongo(fastify, lastSync);

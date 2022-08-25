@@ -11,7 +11,7 @@ import {
 } from '../schemata';
 
 const chatRoutes: FastifyPluginCallback = (
-  fastify: FastifyInstance,
+  fastify: FastifyInstance<any, any, any, any, any>,
   opts: Record<never, never>,
   done: () => void,
 ) => {

@@ -1,11 +1,11 @@
 import pino from 'pino';
 import fastify from 'fastify';
 
-import swaggerPlugin from 'fastify-swagger';
-import sensiblePlugin from 'fastify-sensible';
-import corsPlugin from 'fastify-cors';
-import authPlugin from 'fastify-auth';
-import multipartPlugin from 'fastify-multipart';
+import swaggerPlugin from '@fastify/swagger';
+import sensiblePlugin from '@fastify/sensible';
+import corsPlugin from '@fastify/cors';
+import authPlugin from '@fastify/auth';
+import multipartPlugin from '@fastify/multipart';
 
 import searchRoutes from './api/routes/Search.route';
 import userRoutes from './api/routes/User.route';
