@@ -291,8 +291,8 @@ Response distribution:
 
 In a nutshell: Adding Redis to Chattergram
 
-- **speeded up** the total **response time** by more than **30%** (from 21 seconds to 14 seconds)
-- **reduced** the **average response time** by about **half a second** (from 1690ms to 1106ms)
+- **decreased** the total **processing time under pressure** by more than **30%** (from 21 seconds to 14 seconds)
+- **reduced** the **average response time** of one request by about **half a second** (from 1690ms to 1106ms)
 - **increased** the **amount of transactions** that to be processed by about **50%** (from 445 transactions/s to 685 transactions/ms)
 
 I'll be frank here - Chattergram was my first fullstack Typescript project & many parts are far from optimal. If I was to rewrite it (or any other app, that is) from scratch for a productive environment, I'd always choose Redis again. And if it's only as a frontend database.
