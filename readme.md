@@ -199,6 +199,8 @@ public async queryRedisStore(req: SearchRequest, reply: FastifyReply) {
 
 ### Performance Benchmarks
 
+
+
 [If you migrated an existing app to use Redis, please put performance benchmarks here to show the performance improvements.]
 
 ## How to run it locally?

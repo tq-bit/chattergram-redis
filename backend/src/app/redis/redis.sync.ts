@@ -72,7 +72,6 @@ export async function syncMongoChatHistoryToRedis() {
       _id: historyItemDocument._id.toString(),
     });
   });
-  ChatRepository.createIndex();
 }
 
 export async function syncMongoUsersToRedis() {
@@ -90,7 +89,6 @@ export async function syncMongoUsersToRedis() {
       online: false,
     });
   });
-  UserRepository.createIndex();
 }
 
 export async function performFullSynchronization() {
@@ -102,4 +100,9 @@ export async function performFullSynchronization() {
 
   await Promise.all([syncMongoChatHistoryToRedis(), syncMongoUsersToRedis()]);
   client.set(KEY_REDIS_TO_MONGO_SYNC, DateTime.local().toString());
+
+  await Promise.all([
+    UserRepository.createIndex(),
+    ChatRepository.createIndex(),
+  ]);
 }
