@@ -58,6 +58,7 @@ ChatRepository.search()
   .return.all();
 ```
 
+
     - Then, I insert the messages from Redis to MongoDB with `inserMany`
   - From MongoDB to Redis
     - First, I execute `FLUSHALL` on the DB to get rid of older Chat & User entries
