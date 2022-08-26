@@ -18,6 +18,8 @@ const securityRoutes: FastifyPluginCallback = (
     {
       schema: {
         body: SignupFormSchema,
+        description:
+          'Create a new user within the `Security` and `User` entity. Returns an object with the newly created user and a JWT.',
         response: {
           200: LoginResponseSchema,
         },
@@ -31,6 +33,8 @@ const securityRoutes: FastifyPluginCallback = (
     {
       schema: {
         body: LoginFormSchema,
+        description:
+          'Handle the login workflow for the actuve user. Returns an object with the newly created user and a JWT.',
         response: {
           200: LoginResponseSchema,
         },

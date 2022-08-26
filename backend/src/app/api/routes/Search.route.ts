@@ -21,7 +21,7 @@ const chatRoutes: FastifyPluginCallback = (
     schema: {
       security: StaticSecuritySchema,
       querystring: SearchRequestQuery,
-      description: `Execute a search query against the chat and user Redis store.`,
+      description: `Run a search query against the chat and user Redis repository. Returns an array of result items`,
       response: {
         200: {
           type: 'array',

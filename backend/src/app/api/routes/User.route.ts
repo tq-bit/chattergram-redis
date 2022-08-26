@@ -19,6 +19,8 @@ const userRoutes: FastifyPluginCallback = (
   fastify.get<{ Reply: UserSchemaType[] }>('/user/list', {
     schema: {
       security: StaticSecuritySchema,
+      description:
+        'Get a list of all registered users. Returns an array of user items',
       response: {
         200: {
           type: 'array',
@@ -33,6 +35,8 @@ const userRoutes: FastifyPluginCallback = (
   fastify.get<{ Reply: UserSchemaType }>('/user/me', {
     schema: {
       security: StaticSecuritySchema,
+      description:
+        'Get a list fo the currently active user. Returns a user item object',
       response: {
         200: UserSchema,
       },
@@ -46,6 +50,9 @@ const userRoutes: FastifyPluginCallback = (
     {
       schema: {
         security: StaticSecuritySchema,
+        deprecated: true,
+        description:
+          "Update the currently active user. Deprecated for the sake of using Redis pub/sub functionality to update and propagate user's online stati",
         body: UserPublicSchema,
         response: {
           204: {},

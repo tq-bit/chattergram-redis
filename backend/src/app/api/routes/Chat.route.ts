@@ -41,6 +41,8 @@ const chatRoutes: FastifyPluginCallback = (
     {
       schema: {
         security: StaticSecuritySchema,
+        description:
+          "Create a new chat message. If you have uploaded an audio file before, you can use the returned `audioFileId` to trigger Deepgram's transcription flow.",
         body: UserChatSchema,
         response: {
           200: UserChatSchema,
@@ -87,6 +89,8 @@ const chatRoutes: FastifyPluginCallback = (
     {
       schema: {
         security: StaticSecuritySchema,
+        description:
+          'Download an audio file that has been uploaded previously. Returns an object with file metadata and a base64 encoded string that represents the file binary.',
         params: {
           fileUuid: {
             type: 'string',
