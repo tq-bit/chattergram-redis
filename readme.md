@@ -2,7 +2,15 @@
 
 A chat application that transcribes voice messages to text
 
-[Insert app screenshots](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax#uploading-assets)
+Chattergram has its own signup workflow. Your data will be stored on a local MongoDB instance & you can use a fake-email address
+
+![](https://raw.githubusercontent.com/tq-bit/chattergram-redis/master/assets/chattergram_signup.gif)
+
+Once signed up, you can start chatting with other users. If you decide to send them a voice message, Deepgram will try and transcribe the message for you and your sender. You can still listen to the recorded message if you like.
+
+![](https://raw.githubusercontent.com/tq-bit/chattergram-redis/master/assets/chattergram_transcribe.gif)
+
+I've created Chattergram-Redis as a POC project for the [Redis Hackathon on dev.to](https://dev.to/devteam/announcing-the-redis-hackathon-on-dev-3248). Please do not use it in a productive environment
 
 ## How it works
 
