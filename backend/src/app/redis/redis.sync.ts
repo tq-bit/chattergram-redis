@@ -8,12 +8,9 @@ import UserModel from '../model/User.schema';
 
 import { ChatRepository, client, UserRepository } from './redis.provider';
 
-export async function syncRedisChatToMongo(
-  fastify: FastifyInstance,
-  lastSync: string | null,
-) {
+export async function syncRedisChatToMongo(lastSync: string | null) {
   if (!lastSync) {
-    fastify.log.info(
+    console.log(
       'No previous chat sync from Redis to MongoDB found. Attempting a full sync',
     );
 
@@ -27,10 +24,8 @@ export async function syncRedisChatToMongo(
   }
 
   if (lastSync) {
-    fastify.log.info(
-      `Last chat sync from Redis to MongoDB was at '${lastSync}'`,
-    );
-    fastify.log.info(
+    console.log(`Last chat sync from Redis to MongoDB was at '${lastSync}'`);
+    console.log(
       `Attempting to sync all chat entries that were made since then`,
     );
 
@@ -43,19 +38,17 @@ export async function syncRedisChatToMongo(
     );
     const recentChatHistoryLength = recentChatHistory.length;
     if (recentChatHistoryLength === 0) {
-      fastify.log.info(
-        `No chat entries were synchronized from Redis to MongoDB`,
-      );
+      console.log(`No chat entries were synchronized from Redis to MongoDB`);
       return;
     }
     await ChatModel.insertMany(recentChatHistory);
-    fastify.log.info(
+    console.log(
       `Synchronized ${recentChatHistoryLength} entries from Redis to MongoDB`,
     );
   }
 }
 
-export async function syncMongoChatHistoryToRedis(fastify: FastifyInstance) {
+export async function syncMongoChatHistoryToRedis() {
   const threeMonthsAgo = DateTime.local().minus({ months: 3 });
   const historyFromLastThreeMonths = await ChatModel.find({
     dateSent: { $gte: threeMonthsAgo },
@@ -64,11 +57,11 @@ export async function syncMongoChatHistoryToRedis(fastify: FastifyInstance) {
   const chatHistoryLength = historyFromLastThreeMonths.length;
 
   if (chatHistoryLength === 0) {
-    fastify.log.info(`No chat entries were synchronized from MongoDB to Redis`);
+    console.log(`No chat entries were synchronized from MongoDB to Redis`);
     return;
   }
 
-  fastify.log.info(
+  console.log(
     `Synchronizing ${chatHistoryLength} chat entries from MongoDB to Redis`,
   );
   historyFromLastThreeMonths.forEach(async (historyItemDocument) => {
@@ -82,10 +75,10 @@ export async function syncMongoChatHistoryToRedis(fastify: FastifyInstance) {
   ChatRepository.createIndex();
 }
 
-export async function syncMongoUsersToRedis(fastify: FastifyInstance) {
+export async function syncMongoUsersToRedis() {
   const userDocuments = await UserModel.find();
 
-  fastify.log.info(
+  console.log(
     `Synchronizing ${userDocuments.length} users from MongoDB to Redis`,
   );
 
@@ -100,16 +93,13 @@ export async function syncMongoUsersToRedis(fastify: FastifyInstance) {
   UserRepository.createIndex();
 }
 
-export async function performFullSynchronization(fastify: FastifyInstance) {
+export async function performFullSynchronization() {
   const lastSync = await client.get(KEY_REDIS_TO_MONGO_SYNC);
 
-  await syncRedisChatToMongo(fastify, lastSync);
+  await syncRedisChatToMongo(lastSync);
 
   await client.execute(['flushall']);
 
-  await Promise.all([
-    syncMongoChatHistoryToRedis(fastify),
-    syncMongoUsersToRedis(fastify),
-  ]);
+  await Promise.all([syncMongoChatHistoryToRedis(), syncMongoUsersToRedis()]);
   client.set(KEY_REDIS_TO_MONGO_SYNC, DateTime.local().toString());
 }

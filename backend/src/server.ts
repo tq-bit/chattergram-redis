@@ -14,7 +14,7 @@ const main = async () => {
 
     await mongooseConfig.connect();
     await redisProvider.createRedisIndexes();
-    await redisSync.performFullSynchronization(app);
+    await redisSync.performFullSynchronization();
 
     await app.listen(+appPort, host);
   } catch (error) {
