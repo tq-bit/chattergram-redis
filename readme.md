@@ -1,8 +1,8 @@
 # Chattergram + Redis
 
-A chat application that transcribes voice messages to text
+A chat application that transcribes voice messages to text - powered by the [Redis Stack](https://redis.io/docs/stack/)
 
-Chattergram has its own signup workflow. Your data will be stored on a local MongoDB instance & you can use a fake-email address
+Chattergram runs on two separate applications - a frontend and a backend. You need to create an account to access the chat. All of your data will be stored on a local Redis (& MongoDB) instance.
 
 ![](https://raw.githubusercontent.com/tq-bit/chattergram-redis/master/assets/chattergram_signup.gif)
 
@@ -16,12 +16,13 @@ I've created Chattergram-Redis as a POC project for the [Redis Hackathon on dev.
 
 ### How the data is stored:
 
-- This app uses two primary data types: `User` and `Chat` entities created by [`redis-om`](https://redis.com/blog/introducing-redis-om-client-libraries/)
-- It also uses a secondary `Security` entity used to handle registering and login (MongoDB only).
+- This app uses two primary data types: `User` and `Chat` entities created with [`redis-om`](https://redis.com/blog/introducing-redis-om-client-libraries/)
+- It also uses a secondary `Security` entity used to handle registering and login & a `File` entity to handle fileuploads (this is relevant for MongoDB only).
+- In the following, I'll describe both primary data types, their entities and their repositories, in detail
 
 #### 1. The `User` - entity
 
-See [/src/app/redis/User.schema.ts](https://github.com/tq-bit/chattergram-redis/blob/master/backend/src/app/redis/User.schema.ts)
+Defined in [/src/app/redis/User.schema.ts](https://github.com/tq-bit/chattergram-redis/blob/master/backend/src/app/redis/User.schema.ts)
 
 - When a user registers, their data get stored in MongoDB and Redis.
 - Mongoose uses one entity for `User`, one for `Security`.
@@ -41,7 +42,7 @@ See [/src/app/redis/User.schema.ts](https://github.com/tq-bit/chattergram-redis/
 
 #### 2. The `Chat` - entity
 
-See [/src/app/redis/Chat.schema.ts](https://github.com/tq-bit/chattergram-redis/blob/master/backend/src/app/redis/Chat.schema.ts)
+Defined in [/src/app/redis/Chat.schema.ts](https://github.com/tq-bit/chattergram-redis/blob/master/backend/src/app/redis/Chat.schema.ts)
 
 - When a chat message is created, it's stored in Redis
 - It may include a transcribed chat message, given a user has uploaded it previously and sends the receiving `fileId` from the frontend to the `chat` POST - endpoint
@@ -55,9 +56,9 @@ See [/src/app/redis/Chat.schema.ts](https://github.com/tq-bit/chattergram-redis/
 - Finally, the message is propagated to connected Websocket clients
 - The replication from MongoDB into Redis (and vice-versa) happens when the application is restarted and works like this (see [redis.sync.ts](https://github.com/tq-bit/chattergram-redis/blob/master/backend/src/app/redis/redis.sync.ts)):
   - From Redis to MongoDB
-    - I'm checking whether this is the first time chat messages have been synced
-    - If so, I'm simply moving all messages from Redis to MongoDB with `insertMany` (because there are no older chat entries)
-    - If not, I'm using `RedisSearch` to find all entries in Redis that have been created since the last sync
+    - The app checks whether this is the first time chat messages have been synced
+    - If so, it will simply move all messages from Redis to MongoDB with `insertMany` (because there are no older chat entries)
+    - If not, it'll use [`RediSearch`](https://redis.io/docs/stack/search/) to find all entries in Redis that have been created since the last sync
 
 ```ts
 ChatRepository.search()
@@ -66,8 +67,7 @@ ChatRepository.search()
   .return.all();
 ```
 
-
-    - Then, I insert the messages from Redis to MongoDB with `inserMany`
+  - Then, I insert the messages from Redis to MongoDB with `inserMany`
   - From MongoDB to Redis
     - First, I execute `FLUSHALL` on the DB to get rid of older Chat & User entries
     - Mongoose then looks up all chat entries that have been created within the last three months
@@ -116,6 +116,8 @@ public getUserList = async (req: AppRequest, reply: FastifyReply) => {
 
 ##### 2.1. Get a list of chat entries for a pair of `sender` & `receiver`
 
+This method is called whenever a user loads their chat history for a specific contact.
+
 File: [Chat.handler.ts](https://github.com/tq-bit/chattergram-redis/blob/5568f86f56bffdc0a7d116acfa9591ec0ce2f2ff/backend/src/app/handler/Chat.handler.ts#L188)
 
 Code:
@@ -144,7 +146,7 @@ private async getChatHistoryFromRedis(userId: string, partnerId: string) {
 
 ##### 2.2. Find the last redis entry for a pair of `sender` and `receiver`
 
-> This method is used to determine how many entries to skip in MongoDB when loading more history items
+This method is used to determine how many entries to skip in MongoDB when loading more history items.
 
 File: [Chat.handler.ts](https://github.com/tq-bit/chattergram-redis/blob/5568f86f56bffdc0a7d116acfa9591ec0ce2f2ff/backend/src/app/handler/Chat.handler.ts#L222)
 
@@ -170,7 +172,7 @@ const lastRedisEntry = await this.chatRepository
 
 #### 3: Search `Chat` and `User`
 
-I wanted to see how well `redis-om` implements fulltext search. It did not disappoint:
+This is a new feature compared to the old app. I wanted to see how well `redis-om` implements fulltext search. It did not disappoint:
 
 File: [Search.handler.ts](https://github.com/tq-bit/chattergram-redis/blob/master/backend/src/app/handler/Search.handler.ts#L12)
 
@@ -205,12 +207,9 @@ public async queryRedisStore(req: SearchRequest, reply: FastifyReply) {
 
 ```
 
-
 ### Performance Benchmarks
 
-> I'm benchmarking the new Chattergram version vs. its old precursor. Check out [this repos](https://github.com/tq-bit/chattergram) if you would like to recreate the test case.
-
-Since Chattergram is a realtime application with its scope addressed towards smaller companies, I figured the following test case would be a realistic scenario when the app is under high pressure:
+> I'm benchmarking the new Chattergram version vs. its precursor. Check out [this repos](https://github.com/tq-bit/chattergram) if you would like to recreate the test case.
 
 **Performance indicators**
 
@@ -224,7 +223,7 @@ Since Chattergram is a realtime application with its scope addressed towards sma
 - *Loop count*: `10`
 - *Same user on each iteration*: `true`
 
-As I did not change underlying business CRUD logic in the application's routes and handlers*, the only bottleneck when sending messages that remains is the database. The comparison below was created with Jmeter, an open source load testing tool. It uses the HTTP protocol to send POST requests to the API and create new chat messages.
+For I did not change underlying CRUD logic*, the only bottleneck left is the database. The comparison below was created with [Jmeter](https://jmeter.apache.org/), an open source load testing tool. It uses the HTTP protocol to send POST requests to the API and create new chat messages.
 
 I also disabled Pino logger in `app.ts` to ensure there's nothing going on during the test case that's not really necessary.
 
@@ -242,28 +241,6 @@ Payload (JSON):
   "text": "Sent with Apache JMeter"
 }
 ```
-
-##### Results with Chattergram + Redis
-
-Prerequisites:
-
-- Created a user with the ID of `6307cffcc3a0365d7358f665` before starting the test
-- Deleted all entries from Redis and MongoDB before starting the bm
-- Started the application and created indexes for `User` and `Chat` repositories
-
-Results:
-
-- The test ran for **~14 seconds**
-- The average response time was **~1106ms (median: ~1033ms)**
-- The average throughput was **~685 transactions/s**
-
-Statistics:
-
-![](https://github.com/tq-bit/chattergram-redis/blob/master/.github/benchmark/respose-time-with-redis.png)
-
-Response distribution:
-
-![](https://github.com/tq-bit/chattergram-redis/blob/master/.github/benchmark/response-time-distro-with-redis.png)
 
 ##### Results with Chattergram w/o Redis (PostgreSQL)
 
@@ -286,6 +263,27 @@ Response distribution:
 
 ![](https://github.com/tq-bit/chattergram-redis/blob/master/.github/benchmark/response-time-distro-with-postgres.png)
 
+##### Results with Chattergram + Redis
+
+Prerequisites:
+
+- Created a user with the ID of `6307cffcc3a0365d7358f665` before starting the test
+- Deleted all entries from Redis and MongoDB before starting the bm
+- Started the application and created indexes for `User` and `Chat` repositories
+
+Results:
+
+- The test ran for **~14 seconds**
+- The average response time was **~1106ms (median: ~1033ms)**
+- The average throughput was **~685 transactions/s**
+
+Statistics:
+
+![](https://github.com/tq-bit/chattergram-redis/blob/master/.github/benchmark/respose-time-with-redis.png)
+
+Response distribution:
+
+![](https://github.com/tq-bit/chattergram-redis/blob/master/.github/benchmark/response-time-distro-with-redis.png)
 
 #### Conclusion
 
@@ -328,14 +326,14 @@ Chattergram uses the Deepgram API for STT. So register and grab an API key.
    ```
 4. Make the setup & start scripts executable
   ```sh
-  chmod +x bin/start.sh
-  chmod +x bin/setup.sh
+  chmod +x bin/start.sh bin/setup.sh
   ```
 6. Run `sh bin/setup` and pass in your API key OR
 7. Create a `.env` file in the root directory (you can use the .env.example file for templating) + enter your API key under `DEEPGRAM_KEY`
+8. In the project's root directory, run `sudo bin/start.sh -d`
 
 > Note: If you change global variables in this file, you have to adjust the respective docker-compose.(d|p).yaml file as well
 
 ## Deployment
 
-You can run and deploy Chattergram in any container environment with a few tweaks. Please check out the [original readme](https://github.com/tq-bit/chattergram-redis/blob/master/readme_legacy.md#run-the-app) for this project for further information.
+Unfortunatly, I haven't originally built this app with serverless hosting in mind. You can, however, run and deploy Chattergram in any container environment with a few tweaks. Please check out the [original readme](https://github.com/tq-bit/chattergram-redis/blob/master/readme_legacy.md#run-the-app) for this project for further information or contact me (e.g. using an issue) if you'd like some help with a setup.
