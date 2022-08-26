@@ -199,9 +199,96 @@ public async queryRedisStore(req: SearchRequest, reply: FastifyReply) {
 
 ### Performance Benchmarks
 
+> I'm benchmarking the new Chattergram version vs. its old precursor. Check out [this repos](https://github.com/tq-bit/chattergram) if you would like to recreate the test case.
+
+Since Chattergram is a realtime application with its scope addressed towards smaller companies, I figured the following test case would be a realistic scenario when the app is under high pressure:
+
+**Performance indicators**
+
+- the amount of throughput the app is able to process
+- the number of reqeusts a single app instance is able to serve under pressure
+
+**Test Params**:
+
+- Number of Threads: 1000
+- Ramp-up period: 5s
+- Loop count: 10
+- Same user on each iteration: true
+
+As I did not change underlying business CRUD logic in the application's routes and handlers*, the only bottleneck when sending messages that remains is the database. The comparison below was created with Jmeter, an open source load testing tool. It uses the HTTP protocol to send POST requests to the API and create new chat messages.
+
+I also disabled Pino logger in `app.ts` to ensure there's nothing going on during the test case that's not really necessary.
+
+> * What I did change was to replace the handler event listener's logic to a Redis pub/sub mode. In this case, I figured that's just another perk added by using a common Redis feature. You can find this change highlighted in the architecture diagram.
 
 
-[If you migrated an existing app to use Redis, please put performance benchmarks here to show the performance improvements.]
+#### Sending a POST request to create a new message (text-only)
+
+Payload (JSON):
+
+```json
+{
+  "senderId": "6307cffcc3a0365d7358f665",   // or any valid senderId
+  "receiverId": "6307cffcc3a0365d7358f665", // or any valid receiverId
+  "text": "Sent with Apache JMeter"
+}
+```
+
+##### Results with Chattergram + Redis
+
+Prerequisites:
+
+- Created a user with the ID of `6307cffcc3a0365d7358f665` before starting the test
+- Deleted all entries from Redis and MongoDB before starting the bm
+- Started the application and created indexes for `User` and `Chat` repositories
+
+Results:
+
+- The test ran for ~14 seconds
+- The average response time was ~1106ms (median: ~1033ms)
+- The average throughput was ~685 transactions/s
+
+Statistics:
+
+![](https://github.com/tq-bit/chattergram-redis/blob/master/.github/benchmark/respose-time-with-redis.png)
+
+Response distribution:
+
+![](https://github.com/tq-bit/chattergram-redis/blob/master/.github/benchmark/response-time-distro-with-redis.png)
+
+##### Results with Chattergram w/o Redis (PostgreSQL)
+
+Prerequisutes:
+
+- Created a user with the ID of `1` before starting the test
+- Deleted all entries from PostgreSQL before starting the bm
+
+** The Test ran for ~21 seconds total **
+
+Results:
+
+- The test ran for ~21 seconds
+- The average response time was ~1690ms (median: ~1805ms)
+- The average throughput was ~455 transactions/s
+
+Statistics:
+
+![](https://github.com/tq-bit/chattergram-redis/blob/master/.github/benchmark/respose-time-with-postgres.png)
+
+Response distribution:
+
+![](https://github.com/tq-bit/chattergram-redis/blob/master/.github/benchmark/response-time-distro-with-postgres.png)
+
+
+#### Conclusion
+
+In a nutshell: Adding Redis to Chattergram
+
+- speeded up the total response time by about 30%
+- reduced the average response time by about half a second
+- increased the amount of transactions that to be processed by about 50%
+
+I'll be frank here - Chattergram was my first fullstack Typescript project & many parts are far from optimal. If I was to rewrite it (or any other app, that is) from scratch for a productive environment, I'd always choose Redis again. And if it's only as a frontend database.
 
 ## How to run it locally?
 
