@@ -11,6 +11,19 @@ if [[ $response == "200" ]]; then
   cat .env.example >.env
   sed -i "s/DEEPGRAM_KEY=.*/DEEPGRAM_KEY=$DEEPGRAM_KEY/g" .env
 else
-  echo "Failed to connect to deepgram! $response"
+  echo "Failed to connect to Deepgram!  $response"
+  echo "If this error persists, please manually copy your Deepgram API key into the .env.example file and rename it to '.env'"
   exit 1
 fi
+
+echo "Installing backend NPM dependencies"
+cd ./backend
+npm install
+cd ..
+
+echo "Installing frontend NPM dependencies"
+cd ./frontend
+npm install
+cd ..
+
+exit 0
