@@ -324,7 +324,7 @@ Chattergram uses the Deepgram API for STT. So register and grab an API key.
 2. Create a new API key (permission: Member is sufficient)
 3. Clone the repo
    ```sh
-   git clone https://github.com/tq-bit/chattergram.git
+   git clone git@github.com:tq-bit/chattergram-redis.git
    ```
 4. Make the setup & start scripts executable
   ```sh
