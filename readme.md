@@ -210,16 +210,16 @@ Since Chattergram is a realtime application with its scope addressed towards sma
 
 **Test Params**:
 
-- Number of Threads: 1000
-- Ramp-up period: 5s
-- Loop count: 10
-- Same user on each iteration: true
+- *Number of Threads*: `1000`
+- *Ramp-up period*: `5s`
+- *Loop count*: `10`
+- *Same user on each iteration*: `true`
 
 As I did not change underlying business CRUD logic in the application's routes and handlers*, the only bottleneck when sending messages that remains is the database. The comparison below was created with Jmeter, an open source load testing tool. It uses the HTTP protocol to send POST requests to the API and create new chat messages.
 
 I also disabled Pino logger in `app.ts` to ensure there's nothing going on during the test case that's not really necessary.
 
-> * What I did change was to replace the handler event listener's logic to a Redis pub/sub mode. In this case, I figured that's just another perk added by using a common Redis feature. You can find this change highlighted in the architecture diagram.
+> \* What I did change was to replace the handler event listener's logic to a Redis pub/sub mode. In this case, I figured that's just another perk added by using a common Redis feature. You can find this change highlighted in the architecture diagram.
 
 
 #### Sending a POST request to create a new message (text-only)
@@ -244,9 +244,9 @@ Prerequisites:
 
 Results:
 
-- The test ran for ~14 seconds
-- The average response time was ~1106ms (median: ~1033ms)
-- The average throughput was ~685 transactions/s
+- The test ran for **~14 seconds**
+- The average response time was **~1106ms (median: ~1033ms)**
+- The average throughput was **~685 transactions/s**
 
 Statistics:
 
@@ -263,13 +263,11 @@ Prerequisutes:
 - Created a user with the ID of `1` before starting the test
 - Deleted all entries from PostgreSQL before starting the bm
 
-** The Test ran for ~21 seconds total **
-
 Results:
 
-- The test ran for ~21 seconds
-- The average response time was ~1690ms (median: ~1805ms)
-- The average throughput was ~455 transactions/s
+- The test ran for **~21 seconds**
+- The average response time was **~1690ms (median: ~1805ms)**
+- The average throughput was **~455 transactions/s**
 
 Statistics:
 
@@ -284,9 +282,9 @@ Response distribution:
 
 In a nutshell: Adding Redis to Chattergram
 
-- speeded up the total response time by about 30%
-- reduced the average response time by about half a second
-- increased the amount of transactions that to be processed by about 50%
+- **speeded up** the total **response time** by more than **30%** (from 21 seconds to 14 seconds)
+- **reduced** the **average response time** by about **half a second** (from 1690ms to 1106ms)
+- **increased** the **amount of transactions** that to be processed by about **50%** (from 445 transactions/s to 685 transactions/ms)
 
 I'll be frank here - Chattergram was my first fullstack Typescript project & many parts are far from optimal. If I was to rewrite it (or any other app, that is) from scratch for a productive environment, I'd always choose Redis again. And if it's only as a frontend database.
 
