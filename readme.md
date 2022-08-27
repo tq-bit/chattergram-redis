@@ -16,7 +16,7 @@ I've created Chattergram-Redis as a POC project for the [Redis Hackathon on dev.
 
 ### Video explanation
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/fTBgz28DHGs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+You can find a video version of my submission on Youtube:
 
 https://youtu.be/fTBgz28DHGs
 
