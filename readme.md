@@ -14,6 +14,12 @@ I've created Chattergram-Redis as a POC project for the [Redis Hackathon on dev.
 
 ## How it works
 
+### Video explanation
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/fTBgz28DHGs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+https://youtu.be/fTBgz28DHGs
+
 ### How the data is stored:
 
 - This app uses two primary data types: `User` and `Chat` entities created with [`redis-om`](https://redis.com/blog/introducing-redis-om-client-libraries/)
